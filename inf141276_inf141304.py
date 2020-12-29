@@ -6,7 +6,14 @@ from scipy import *
 import os
 from scipy.signal import decimate
 from scipy.signal.windows import kaiser
-from constants import *
+
+# constants
+limit_frequency = 150
+# (40; 50)
+kaiser_beta = 40
+decimated_range = range(2, 5)
+# best in (60; 90)
+start_freq = 60
 
 def recognize_gender(freq):
     if freq < limit_frequency:
