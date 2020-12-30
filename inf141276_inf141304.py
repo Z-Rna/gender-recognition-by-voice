@@ -7,16 +7,13 @@ import os
 from scipy.signal import decimate
 from scipy.signal.windows import kaiser
 
-# constants
-limit_frequency = 150
-# (40; 50)
-kaiser_beta = 40
-decimated_range = range(2, 5)
-# best in (60; 90)
-start_freq = 60
+LIMIT_FREQ = 150
+KAISER_BETA = 40
+SAMPLES = range(2, 5)
+START_FREQ = 60
 
 def recognize_gender(freq):
-    if freq < limit_frequency:
+    if freq < LIMIT_FREQ:
         return 'M'
     else:
         return 'K'
@@ -25,9 +22,9 @@ def hps(signal, w):
     # algorithm im using, Harmonic Product Spectrum: https://surveillance9.sciencesconf.org/data/151173.pdf
     n = len(signal)
     sample_rate = float(n) / w
-    
-    # kaiser window function gives best results
-    signal = signal * kaiser(n, kaiser_beta)
+
+    # kaiser window function gives the best results
+    signal = signal * kaiser(n, KAISER_BETA)
 
     # abs of fft signal in logarithm scale
     spectrum = np.log(abs(fft.fft(signal)))
@@ -35,18 +32,17 @@ def hps(signal, w):
     hps_spectrum = np.copy(spectrum)
 
     # create couple versions of spectrum (different samples)
-    for d_r in decimated_range:
+    for s in SAMPLES:
         # take every d_t'th item of spectrum
-        decimated = decimate(spectrum, d_r)
+        decimated = decimate(spectrum, s)
         # multiply corresponding items of every decimated spectrum
         hps_spectrum[:len(decimated)] *= decimated
 
-    start = start_freq * sample_rate
+    start = START_FREQ * sample_rate
     peak = np.argmax(hps_spectrum[int(start):])
     freq = (start + peak) / sample_rate
 
     return freq
-
 
 def read_signal(path):
     w, signal = scipy.io.wavfile.read(path)
